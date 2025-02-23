@@ -15,7 +15,7 @@
 
 # next.js
 /.next/
-/out/
+# /out/ -- Add back later 
 
 # production
 /build
