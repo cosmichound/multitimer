@@ -16,7 +16,13 @@ runs:
         path: node_modules
         key: node-modules-${{ hashFiles('multitimer/package-lock.json') }}
 
+    - name: diag
+      shell: bash
+      run: ls 
+      
     - name: Install dependencies 🔧
       shell: bash
       if: steps.cache_dependencies.outputs.cache-hit != 'true'
       run: npm ci
+      
+      
