@@ -1,9 +1,19 @@
+// @ts-check
+ 
 import type { NextConfig } from "next";
+const { PHASE_DEVELOPMENT_SERVER } = require('next/constants')
 
-const nextConfig: NextConfig = {
+const devConfig: NextConfig = {
+
+}
+
+const prodConfig: NextConfig = {
   basePath: '/multitimer',
   output: 'export',
  
+  images: {
+    unoptimized: true,
+  },
   // Optional: Change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
   // trailingSlash: true,
  
@@ -14,4 +24,13 @@ const nextConfig: NextConfig = {
   distDir: 'out',
 };
 
-export default nextConfig;
+
+
+module.exports = (phase:string , { defaultConfig }:NextConfig) => {
+  if (phase === PHASE_DEVELOPMENT_SERVER) {
+    return devConfig;
+  }
+ 
+  return prodConfig;
+}
+
