@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  basePath: '/multitimer',
   output: 'export',
  
   // Optional: Change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
@@ -10,7 +11,7 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
  
   // Optional: Change the output directory `out` -> `dist`
-  distDir: '../docs',
+  distDir: 'out',
 };
 
 export default nextConfig;
