@@ -7,6 +7,21 @@ export interface Timer {
   name?: string;      // Optional name or label for the timer (e.g., "Phase 1", "Task A")
 }
 
+/**
+ * Formats time in seconds into MM:SS format.
+ * @param totalSeconds Total seconds to format.
+ * @returns Time string in MM:SS format (e.g., "05:30").
+ */
+export function formatTime(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  const minutesString = String(minutes).padStart(2, '0'); // Pad with leading zero if necessary
+  const secondsString = String(seconds).padStart(2, '0'); // Pad with leading zero if necessary
+
+  return `${minutesString}:${secondsString}`;
+}
+
 export function startTimer(timer: Timer): Timer {
   return { ...timer, isRunning: true };
 }
