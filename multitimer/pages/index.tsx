@@ -105,6 +105,9 @@ const TimerTestPage: React.FC = () => {
     if (timerSequence.some((timer) => timer.isRunning)) {
       // Optionally: Decide what to do if a timer is already running when "Master Start" is pressed.
       // For now, let's do nothing if any timer is already running.
+      if (currentTimerIndex != null) { 
+        handleStartTimer(currentTimerIndex); // TODO 
+      }
       return;
     }
 
