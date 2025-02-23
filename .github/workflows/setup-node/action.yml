@@ -11,7 +11,6 @@ runs:
         node-version: 20
 
     - name: Cache dependencies ⚡
-      working-directory: ./multitimer
       id: cache_dependencies
       uses: actions/cache@v3
       with:
@@ -21,7 +20,9 @@ runs:
     - name: diag
       shell: bash
       working-directory: ./multitimer
-      run: ls -R
+      run: |
+        ls -R
+        pwd
       
       
     - name: Install dependencies 🔧
