@@ -16,14 +16,6 @@ runs:
       with:
         path: multitimer/node_modules
         key: node-modules-${{ hashFiles('multitimer/package-lock.json') }}
-
-    - name: diag
-      shell: bash
-      working-directory: ./multitimer
-      run: |
-        ls -R
-        pwd
-      
       
     - name: Install dependencies 🔧
       shell: bash
