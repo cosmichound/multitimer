@@ -18,7 +18,7 @@ runs:
 
     - name: diag
       shell: bash
-      run: ls 
+      run: ls -r
       
     - name: Install dependencies 🔧
       shell: bash
