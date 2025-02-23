@@ -12,7 +12,6 @@ const prodConfig: NextConfig = {
   output: 'export',
  
   images: {
-    unoptimized: true,
     loader: 'custom', 
     loaderFile: './imageLoader.js',
   },
