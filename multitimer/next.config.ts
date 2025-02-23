@@ -13,6 +13,8 @@ const prodConfig: NextConfig = {
  
   images: {
     unoptimized: true,
+    loader: 'custom', 
+    loaderFile: './imageLoader.js',
   },
   // Optional: Change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
   // trailingSlash: true,
