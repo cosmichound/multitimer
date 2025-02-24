@@ -9,7 +9,6 @@ import {
   stopTimer,
   resetTimer,
   updateTimer,
-  getNextTimer,
   formatTime,
 } from '../logic/timer';
 
@@ -18,6 +17,23 @@ const TimerTestPage: React.FC = () => {
   const [currentTimerIndex, setCurrentTimerIndex] = useState<number | null>(
     null,
   );
+
+  const partialUpdateSequence = (
+    updatedTimer: Timer,
+    currentSequence: Timer[],
+  ) => {
+    const updatedSequence = currentSequence.map(
+      (timer) => (timer.id === updatedTimer.id ? updatedTimer : timer), // Update the specific timer in the sequence
+    );
+    return updatedSequence;
+  };
+
+  const updateSequence = (updatedTimer: Timer) => {
+    const updatedSequence = timerSequence.map(
+      (timer) => (timer.id === updatedTimer.id ? updatedTimer : timer), // Update the specific timer in the sequence
+    );
+    setTimerSequence(updatedSequence);
+  };
 
   const handleAddTimer = () => {
     const newTimer: Timer = {
@@ -31,7 +47,14 @@ const TimerTestPage: React.FC = () => {
     setTimerSequence(updatedSequence); // Update the timerSequence state
   };
 
+  // Removing the running timer stops it and clears the running timer
   const handleRemoveTimer = (timerId: string | number) => {
+    if (timerId == currentTimerIndex) {
+      if (timerSequence[timerId].isRunning) {
+        stopTimer(timerSequence[timerId]);
+      }
+      setCurrentTimerIndex(null);
+    }
     const updatedSequence = removeTimerFromSequence(timerSequence, timerId);
     setTimerSequence(updatedSequence);
   };
@@ -49,6 +72,9 @@ const TimerTestPage: React.FC = () => {
         newPosition,
       );
       setTimerSequence(updatedSequence);
+      if (currentIndex == currentTimerIndex) {
+        setCurrentTimerIndex(newPosition);
+      }
     }
   };
 
@@ -65,99 +91,175 @@ const TimerTestPage: React.FC = () => {
         newPosition,
       );
       setTimerSequence(updatedSequence);
-    }
-  };
-  const handleStartTimer = (timerId: string | number) => {
-    const timerToStart = timerSequence.find((timer) => timer.id === timerId);
-    if (timerToStart) {
-      const updatedTimer = startTimer(timerToStart); // Call startTimer logic
-      const updatedSequence = timerSequence.map(
-        (timer) => (timer.id === timerId ? updatedTimer : timer), // Update the specific timer in the sequence
-      );
-      setTimerSequence(updatedSequence);
-    }
-  };
-
-  const handleStopTimer = (timerId: string | number) => {
-    const timerToStop = timerSequence.find((timer) => timer.id === timerId);
-    if (timerToStop && timerToStop.isRunning) {
-      // Only stop if it's currently running
-      const updatedTimer = stopTimer(timerToStop); // Call stopTimer logic
-      const updatedSequence = timerSequence.map(
-        (timer) => (timer.id === timerId ? updatedTimer : timer), // Update the specific timer in the sequence
-      );
-      setTimerSequence(updatedSequence);
-    }
-  };
-
-  const handleResetTimer = (timerId: string | number) => {
-    const timerToReset = timerSequence.find((timer) => timer.id === timerId);
-    if (timerToReset) {
-      const updatedTimer = resetTimer(timerToReset); // Call resetTimer logic
-      const updatedSequence = timerSequence.map(
-        (timer) => (timer.id === timerId ? updatedTimer : timer), // Update the specific timer in the sequence
-      );
-      setTimerSequence(updatedSequence);
-    }
-  };
-
-  const handleMasterStart = () => {
-    if (timerSequence.some((timer) => timer.isRunning)) {
-      // Optionally: Decide what to do if a timer is already running when "Master Start" is pressed.
-      // For now, let's do nothing if any timer is already running.
-      if (currentTimerIndex != null) { 
-        handleStartTimer(currentTimerIndex); // TODO 
+      if (currentIndex == currentTimerIndex) {
+        setCurrentTimerIndex(newPosition);
       }
-      return;
-    }
-
-    const firstTimer = getNextTimer(timerSequence); // Get the first timer in the sequence
-    if (firstTimer) {
-      handleStartTimer(firstTimer.id); // Use existing handleStartTimer to start the first one
-      setCurrentTimerIndex(0); // Set currentTimerIndex to the index of the first timer (0) - assuming it's always the first for master start.  We might need to refine this if sequence changes dynamically during run. For now, simple approach.
     }
   };
 
-  const handleMasterStop = () => {
-    const runningTimer = timerSequence.find((timer) => timer.isRunning); // Find the currently running timer
-    if (runningTimer) {
-      handleStopTimer(runningTimer.id); // Use existing handleStopTimer to stop it
-      setCurrentTimerIndex(null); // Reset currentTimerIndex as no timer is actively running in sequence after master stop
+  // Starting a timer stops the running timer
+  const handleStartTimer = (timerId: string | number) => {
+    if (currentTimerIndex && timerSequence[currentTimerIndex].isRunning) {
+      stopTimer(timerSequence[currentTimerIndex]);
+    }
+    const timerIndexToStart = timerSequence.findIndex(
+      (timer) => timer.id === timerId,
+    );
+    if (timerIndexToStart >= 0) {
+      const updatedTimer = startTimer(timerSequence[timerIndexToStart]); // Call startTimer logic
+      setCurrentTimerIndex(timerIndexToStart);
+      updateSequence(updatedTimer);
     }
   };
 
-  const [isMasterPaused, setIsMasterPaused] = useState(false); // State to track master pause status
-
-  const handleMasterPause = () => {
-    setIsMasterPaused((wasPaused) => {
-      // Functional update for pause state
-      const runningTimer = timerSequence.find((timer) => timer.isRunning);
-      if (runningTimer) {
-        if (!wasPaused) {
-          // Pause: Stop time progression but keep timer as 'isRunning' conceptually
-          handleStopTimer(runningTimer.id); // Stop time updates by calling stopTimer (which sets isRunning: false)
-          return true; // Set master pause state to true (now paused)
+  // Stopping a timer starts the next timer in the sequence
+  const handleNextTimer = (timerId: string | number) => {
+    const timerIndexToStop = timerSequence.findIndex(
+      (timer) => timer.id === timerId,
+    );
+    let updatedSequence = timerSequence;
+    if (timerIndexToStop >= 0 && timerSequence[timerIndexToStop].isRunning) {
+      const stoppedTimer = stopTimer(timerSequence[timerIndexToStop]);
+      updatedSequence = partialUpdateSequence(stoppedTimer, updatedSequence);
+      if (timerIndexToStop == currentTimerIndex) {
+        const timerIndexToStart = timerIndexToStop + 1;
+        if (timerIndexToStart <= timerSequence.length - 1) {
+          const startedTimer = startTimer(timerSequence[timerIndexToStart]);
+          setCurrentTimerIndex(timerIndexToStart);
+          updatedSequence = partialUpdateSequence(
+            startedTimer,
+            updatedSequence,
+          );
         } else {
-          // Resume: Restart time progression
-          handleStartTimer(runningTimer.id); // Restart time updates by calling startTimer (sets isRunning: true)
-          return false; // Set master pause state to false (now running)
+          setCurrentTimerIndex(null);
         }
       }
-      return wasPaused; // If no running timer, keep pause state unchanged
-    });
+    }
+    setTimerSequence(updatedSequence);
   };
 
-  const getListItemStyle = (timer: Timer) => {
+  const handleMasterResetTimer = () => {
+    let updatedSequence = timerSequence;
+
+    timerSequence.map((timer) => {
+      const changedTimer = resetTimer(timer);
+      updatedSequence = partialUpdateSequence(changedTimer, updatedSequence);
+    });
+    setTimerSequence(updatedSequence);
+    setCurrentTimerIndex(null);
+  };
+
+  // Pause stops / starts the current timer
+  const handleMasterPause = () => {
+    if (currentTimerIndex != null) {
+      if (timerSequence[currentTimerIndex].isRunning) {
+        const updatedTimer = stopTimer(timerSequence[currentTimerIndex]);
+        updateSequence(updatedTimer);
+      } else {
+        const updatedTimer = startTimer(timerSequence[currentTimerIndex]);
+        updateSequence(updatedTimer);
+      }
+    } else {
+      if (timerSequence.length > 0) {
+        // Start the first timer
+        setCurrentTimerIndex(0);
+        const updatedTimer = startTimer(timerSequence[0]);
+        updateSequence(updatedTimer);
+      }
+    }
+  };
+
+  const isMasterControlDisabled = () => {
+    return timerSequence.length == 0;
+  };
+
+  const isAnyTimerRunning = () => {
+    return (
+      currentTimerIndex != null && timerSequence[currentTimerIndex].isRunning
+    );
+  };
+
+  const masterControlText = () => {
+    if (currentTimerIndex != null) {
+      if (timerSequence[currentTimerIndex].isRunning) {
+        return 'Pause Running Timer';
+      } else {
+        return 'Start Current Timer.';
+      }
+    }
+    if (timerSequence.length > 0) {
+      return 'Start First Timer';
+    } else {
+      return '(add a timer first)';
+    }
+  };
+
+  const getListItemStyle = (timer: Timer, index: number) => {
     let baseStyle = listItemStyle; // Start with the default list item style
 
-    if (timer.isRunning) {
-      baseStyle = { ...baseStyle, backgroundColor: 'lightgreen' }; // Apply green background if running
-    }
-    if (timer.isOverrun) {
-      baseStyle = { ...baseStyle, backgroundColor: 'lightcoral' }; // Apply red background if overrun
+    if (index == currentTimerIndex) {
+      baseStyle = {
+        ...baseStyle,
+        border: '3px solid black',
+        backgroundImage:
+          'repeated-linear-gradient(-45deg,transparent,transparent 20px,black 20px,black 40px)',
+      };
+      if (timer.isOverrun) {
+        baseStyle = { ...baseStyle, backgroundColor: 'lightcoral' }; // Apply red background if overrun
+      } else {
+        baseStyle = { ...baseStyle, backgroundColor: 'lightgreen' }; // Apply green background if running
+      }
+    } else {
+      if (timer.isOverrun) {
+        baseStyle = { ...baseStyle, backgroundColor: '#ffdddd' }; // Apply red background if overrun
+      } else {
+        // If there's a running timer fade those before it (or if there's total elapsed time
+        // and no timer as we're probably at the end)
+        if (
+          (currentTimerIndex && index < currentTimerIndex) ||
+          (currentTimerIndex == null && totalRunTime())
+        ) {
+          if (timer.elapsedTime) {
+            baseStyle = { ...baseStyle, backgroundColor: '#ddffdd' };
+          } else {
+            baseStyle = { ...baseStyle, backgroundColor: '#f9f9f9' };
+          }
+        }
+      }
     }
 
     return baseStyle;
+  };
+
+  const totalTargetTime = () => {
+    if (timerSequence.length) {
+      return timerSequence
+        .map((timer) => timer.expectedTime)
+        .reduce((p, n) => p + n);
+    }
+    return 0;
+  };
+
+  const totalRunTime = () => {
+    if (timerSequence.length) {
+      return timerSequence
+        .map((timer) => timer.elapsedTime)
+        .reduce((p, n) => p + n);
+    }
+    return 0;
+  };
+
+  const totalOverTime = () => {
+    if (timerSequence.length) {
+      return timerSequence
+        .map((timer) =>
+          timer.elapsedTime > timer.expectedTime
+            ? timer.elapsedTime - timer.expectedTime
+            : 0,
+        )
+        .reduce((p, n) => p + n);
+    }
+    return 0;
   };
 
   // Default list item style (slightly modified to be a base for dynamic styles)
@@ -166,7 +268,8 @@ const TimerTestPage: React.FC = () => {
     borderRadius: '5px',
     padding: '10px',
     marginBottom: '10px',
-    backgroundColor: '#f9f9f9', // Default background color
+    backgroundColor: '#bbbbbb', // Default background color
+    backgroundImage: '',
   };
 
   // --- Time Progression Logic using useEffect ---
@@ -203,14 +306,25 @@ const TimerTestPage: React.FC = () => {
       <div style={{ marginBottom: '20px', textAlign: 'center' }}>
         {' '}
         {/* Master controls container styling */}
-        <button style={buttonStyle} onClick={handleMasterStart}>
-          Master Start
+        Current Running Timer: {currentTimerIndex}
+      </div>
+      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+        {' '}
+        {/* Master controls container styling */}
+        Current Elapsed Time: {formatTime(totalRunTime())} -- Current Over Time:{' '}
+        {formatTime(totalOverTime())} -- Total Target Time:{' '}
+        {formatTime(totalTargetTime())}
+      </div>
+      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+        <button
+          style={buttonStyle}
+          onClick={handleMasterPause}
+          disabled={isMasterControlDisabled()}
+        >
+          {masterControlText()}
         </button>
-        <button style={buttonStyle} onClick={handleMasterStop}>
-          Master Stop
-        </button>
-        <button style={buttonStyle} onClick={handleMasterPause}>
-          {isMasterPaused ? 'Master Resume' : 'Master Pause'}
+        <button style={buttonStyle} onClick={handleMasterResetTimer}>
+          Reset All
         </button>
       </div>
       <div>
@@ -219,7 +333,7 @@ const TimerTestPage: React.FC = () => {
           {' '}
           {/* Unordered list styling */}
           {timerSequence.map((timer, index) => (
-            <li key={timer.id} style={getListItemStyle(timer)}>
+            <li key={timer.id} style={getListItemStyle(timer, index)}>
               {' '}
               {/* List item styling */}
               <div style={{ marginBottom: '5px' }}>
@@ -256,6 +370,7 @@ const TimerTestPage: React.FC = () => {
                   <button
                     style={buttonStyleSmall}
                     onClick={() => handleStartTimer(timer.id)}
+                    disabled={isAnyTimerRunning()}
                   >
                     Start
                   </button>
@@ -263,17 +378,11 @@ const TimerTestPage: React.FC = () => {
                 {timer.isRunning && (
                   <button
                     style={buttonStyleSmall}
-                    onClick={() => handleStopTimer(timer.id)}
+                    onClick={() => handleNextTimer(timer.id)}
                   >
-                    Stop
+                    Next
                   </button>
                 )}
-                <button
-                  style={buttonStyleSmall}
-                  onClick={() => handleResetTimer(timer.id)}
-                >
-                  Reset
-                </button>
               </div>
             </li>
           ))}
