@@ -138,6 +138,17 @@ const TimerTestPage: React.FC = () => {
     setTimerSequence(updatedSequence);
   };
 
+  const handleMasterNextTimer = () => {
+    if (currentTimerIndex != null) {
+      handleNextTimer(timerSequence[currentTimerIndex].id);
+    }
+  };
+
+  const handleDeleteAll = () => {
+    setTimerSequence([]);
+    setCurrentTimerIndex(null);
+  };
+
   const handleMasterResetTimer = () => {
     let updatedSequence = timerSequence;
 
@@ -298,15 +309,11 @@ const TimerTestPage: React.FC = () => {
       </h1>
       <div style={{ marginBottom: '20px', textAlign: 'center' }}>
         {' '}
-        {/* Button container styling */}
-        <button style={buttonStyle} onClick={handleAddTimer}>
-          Add Timer
-        </button>
-      </div>
-      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-        {' '}
-        {/* Master controls container styling */}
-        Current Running Timer: {currentTimerIndex}
+        <em>
+          Only one timer is running at a time. Add new timers at the bottom.
+          Pressing 'next' (on the timer or at the top) stops the current timer
+          and starts the next one down.
+        </em>
       </div>
       <div style={{ marginBottom: '20px', textAlign: 'center' }}>
         {' '}
@@ -323,8 +330,20 @@ const TimerTestPage: React.FC = () => {
         >
           {masterControlText()}
         </button>
+        <button
+          style={buttonStyle}
+          onClick={handleMasterNextTimer}
+          disabled={currentTimerIndex == null}
+        >
+          Next Timer
+        </button>
+      </div>
+      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
         <button style={buttonStyle} onClick={handleMasterResetTimer}>
           Reset All
+        </button>
+        <button style={buttonStyle} onClick={handleDeleteAll}>
+          Delete All
         </button>
       </div>
       <div>
@@ -387,6 +406,13 @@ const TimerTestPage: React.FC = () => {
             </li>
           ))}
         </ul>
+      </div>
+      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+        {' '}
+        {/* Button container styling */}
+        <button style={buttonStyle} onClick={handleAddTimer}>
+          Add Timer
+        </button>
       </div>
     </div>
   );
