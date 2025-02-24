@@ -311,7 +311,7 @@ const TimerTestPage: React.FC = () => {
         {' '}
         <em>
           Only one timer is running at a time. Add new timers at the bottom.
-          Pressing 'next' (on the timer or at the top) stops the current timer
+          Pressing next (on the timer or at the top) stops the current timer
           and starts the next one down.
         </em>
       </div>
