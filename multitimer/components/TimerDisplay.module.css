@@ -1,0 +1,48 @@
+@import url('./BaseStyles.module.css'); /* Import the BaseStyles CSS Module */
+
+.buttonStyleSmall {
+  composes: buttonStyle from './BaseStyles.module.css';
+
+  padding: 5px 10px;
+  font-size: 0.9em;
+}
+
+.baseTimer {
+  border: 1px solid #eee;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #bbbbbb;
+  background-image: none;
+}
+
+.currentTimer {
+  border: 3px solid black;
+  background-image: repeated-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 20px,
+    black 20px,
+    black 40px
+  );
+}
+
+.runningTimer {
+  background-image: lightgreen;
+}
+
+.overrunningTimer {
+  background-image: lightcoral;
+}
+
+.overrunTimer {
+  background-image: #ffdddd;
+}
+
+.finishedTimerWithTime {
+  background-color: #ddffdd;
+}
+
+.finishedTimer {
+  background-color: #f9f9f9;
+}

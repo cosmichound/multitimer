@@ -9,8 +9,10 @@ import {
   stopTimer,
   resetTimer,
   updateTimer,
-  formatTime,
 } from '../logic/timer';
+import TimerSequenceDisplay from '../components/TimerSequenceDisplay';
+import MasterControls from '../components/MasterControls';
+import StatusPanel from '../components/StatusPanel';
 
 const TimerTestPage: React.FC = () => {
   const [timerSequence, setTimerSequence] = useState<Timer[]>([]);
@@ -138,6 +140,13 @@ const TimerTestPage: React.FC = () => {
     setTimerSequence(updatedSequence);
   };
 
+  const handleUpdateTimer = (timerId: string | number, value: string) => {
+    const timerToUpdate = timerSequence.find((timer) => timer.id === timerId);
+    if (timerToUpdate) {
+      timerToUpdate.expectedTime = parseInt(value);
+    }
+  };
+
   const handleMasterNextTimer = () => {
     if (currentTimerIndex != null) {
       handleNextTimer(timerSequence[currentTimerIndex].id);
@@ -180,68 +189,6 @@ const TimerTestPage: React.FC = () => {
     }
   };
 
-  const isMasterControlDisabled = () => {
-    return timerSequence.length == 0;
-  };
-
-  const isAnyTimerRunning = () => {
-    return (
-      currentTimerIndex != null && timerSequence[currentTimerIndex].isRunning
-    );
-  };
-
-  const masterControlText = () => {
-    if (currentTimerIndex != null) {
-      if (timerSequence[currentTimerIndex].isRunning) {
-        return 'Pause Running Timer';
-      } else {
-        return 'Start Current Timer.';
-      }
-    }
-    if (timerSequence.length > 0) {
-      return 'Start First Timer';
-    } else {
-      return '(add a timer first)';
-    }
-  };
-
-  const getListItemStyle = (timer: Timer, index: number) => {
-    let baseStyle = listItemStyle; // Start with the default list item style
-
-    if (index == currentTimerIndex) {
-      baseStyle = {
-        ...baseStyle,
-        border: '3px solid black',
-        backgroundImage:
-          'repeated-linear-gradient(-45deg,transparent,transparent 20px,black 20px,black 40px)',
-      };
-      if (timer.isOverrun) {
-        baseStyle = { ...baseStyle, backgroundColor: 'lightcoral' }; // Apply red background if overrun
-      } else {
-        baseStyle = { ...baseStyle, backgroundColor: 'lightgreen' }; // Apply green background if running
-      }
-    } else {
-      if (timer.isOverrun) {
-        baseStyle = { ...baseStyle, backgroundColor: '#ffdddd' }; // Apply red background if overrun
-      } else {
-        // If there's a running timer fade those before it (or if there's total elapsed time
-        // and no timer as we're probably at the end)
-        if (
-          (currentTimerIndex && index < currentTimerIndex) ||
-          (currentTimerIndex == null && totalRunTime())
-        ) {
-          if (timer.elapsedTime) {
-            baseStyle = { ...baseStyle, backgroundColor: '#ddffdd' };
-          } else {
-            baseStyle = { ...baseStyle, backgroundColor: '#f9f9f9' };
-          }
-        }
-      }
-    }
-
-    return baseStyle;
-  };
-
   const totalTargetTime = () => {
     if (timerSequence.length) {
       return timerSequence
@@ -273,16 +220,6 @@ const TimerTestPage: React.FC = () => {
     return 0;
   };
 
-  // Default list item style (slightly modified to be a base for dynamic styles)
-  const listItemStyle = {
-    border: '1px solid #eee',
-    borderRadius: '5px',
-    padding: '10px',
-    marginBottom: '10px',
-    backgroundColor: '#bbbbbb', // Default background color
-    backgroundImage: '',
-  };
-
   // --- Time Progression Logic using useEffect ---
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -304,134 +241,45 @@ const TimerTestPage: React.FC = () => {
     <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
       {' '}
       {/* Main container styling */}
-      <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>
-        Timer Test Page
-      </h1>
+      <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Multitimer</h1>
       <div style={{ marginBottom: '20px', textAlign: 'center' }}>
         {' '}
         <em>
           Only one timer is running at a time. Add new timers at the bottom.
-          Pressing next (on the timer or at the top) stops the current timer
-          and starts the next one down.
+          Pressing next (on the timer or at the top) stops the current timer and
+          starts the next one down.
         </em>
       </div>
-      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-        {' '}
-        {/* Master controls container styling */}
-        Current Elapsed Time: {formatTime(totalRunTime())} -- Current Over Time:{' '}
-        {formatTime(totalOverTime())} -- Total Target Time:{' '}
-        {formatTime(totalTargetTime())}
-      </div>
-      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-        <button
-          style={buttonStyle}
-          onClick={handleMasterPause}
-          disabled={isMasterControlDisabled()}
-        >
-          {masterControlText()}
-        </button>
-        <button
-          style={buttonStyle}
-          onClick={handleMasterNextTimer}
-          disabled={currentTimerIndex == null}
-        >
-          Next Timer
-        </button>
-      </div>
-      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-        <button style={buttonStyle} onClick={handleMasterResetTimer}>
-          Reset All
-        </button>
-        <button style={buttonStyle} onClick={handleDeleteAll}>
-          Delete All
-        </button>
-      </div>
-      <div>
-        <h2 style={{ marginBottom: '10px' }}>Timer Sequence</h2>
-        <ul style={{ listStyleType: 'none', padding: 0 }}>
-          {' '}
-          {/* Unordered list styling */}
-          {timerSequence.map((timer, index) => (
-            <li key={timer.id} style={getListItemStyle(timer, index)}>
-              {' '}
-              {/* List item styling */}
-              <div style={{ marginBottom: '5px' }}>
-                {' '}
-                {/* Timer info line container */}
-                <span>Timer ID: {timer.id}, </span>
-                <span>Expected Time: {formatTime(timer.expectedTime)}, </span>
-                <span>Elapsed Time: {formatTime(timer.elapsedTime)}, </span>
-                <span>Running: {timer.isRunning ? 'Yes' : 'No'}, </span>
-                <span>Overrun: {timer.isOverrun ? 'Yes' : 'No'}</span>
-              </div>
-              <div>
-                {' '}
-                {/* Button row container */}
-                <button
-                  style={buttonStyleSmall}
-                  onClick={() => handleRemoveTimer(timer.id)}
-                >
-                  Remove
-                </button>
-                <button
-                  style={buttonStyleSmall}
-                  onClick={() => handleMoveTimerUp(timer.id, index)}
-                >
-                  Up
-                </button>
-                <button
-                  style={buttonStyleSmall}
-                  onClick={() => handleMoveTimerDown(timer.id, index)}
-                >
-                  Down
-                </button>
-                {!timer.isRunning && (
-                  <button
-                    style={buttonStyleSmall}
-                    onClick={() => handleStartTimer(timer.id)}
-                    disabled={isAnyTimerRunning()}
-                  >
-                    Start
-                  </button>
-                )}
-                {timer.isRunning && (
-                  <button
-                    style={buttonStyleSmall}
-                    onClick={() => handleNextTimer(timer.id)}
-                  >
-                    Next
-                  </button>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-        {' '}
-        {/* Button container styling */}
-        <button style={buttonStyle} onClick={handleAddTimer}>
-          Add Timer
-        </button>
-      </div>
+      <StatusPanel
+        totalRunTime={totalRunTime()}
+        totalOverTime={totalOverTime()}
+        totalTargetTime={totalTargetTime()}
+      />
+      <MasterControls
+        onMasterStartPause={handleMasterPause}
+        onMasterNext={handleMasterNextTimer}
+        onMasterReset={handleMasterResetTimer}
+        onDeleteAll={handleDeleteAll}
+        onMasterAdd={handleAddTimer}
+        numTimers={timerSequence.length}
+        isStarted={currentTimerIndex != null}
+        isRunning={
+          currentTimerIndex != null &&
+          timerSequence[currentTimerIndex].isRunning
+        }
+      />
+      <TimerSequenceDisplay
+        timerSequence={timerSequence}
+        currentTimerIndex={currentTimerIndex}
+        onRemove={handleRemoveTimer}
+        onMoveUp={handleMoveTimerUp}
+        onMoveDown={handleMoveTimerDown}
+        onStart={handleStartTimer}
+        onNext={handleNextTimer}
+        onUpdateTimer={handleUpdateTimer}
+      />
     </div>
   );
-};
-
-// Reusable button styles (you can adjust these as desired)
-const buttonStyle = {
-  padding: '8px 15px',
-  margin: '5px',
-  cursor: 'pointer',
-  borderRadius: '5px',
-  border: '1px solid #ccc',
-  backgroundColor: '#f0f0f0',
-};
-
-const buttonStyleSmall = {
-  ...buttonStyle, // Inherit from buttonStyle
-  padding: '5px 10px',
-  fontSize: '0.9em',
 };
 
 export default TimerTestPage;
