@@ -1,0 +1,2 @@
+Fix and sanitize timer styles 
+Can we pass the timer class instead of the index and move the functionality
