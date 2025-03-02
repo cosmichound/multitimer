@@ -3,6 +3,8 @@ import React from 'react';
 import { Timer } from '../logic/timer'; // Adjust path if needed
 import { formatTime } from '../logic/timer'; // Adjust path if needed
 import styles from './TimerDisplay.module.css'; // Import CSS Module (convention: import as 'styles')
+import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
+import { time } from 'console';
 
 interface TimerDisplayProps {
   timer: Timer;
@@ -22,27 +24,24 @@ const getListItemStyle = (
   isCurrent: boolean,
   hasFinished: boolean,
 ) => {
-  const classes = [styles.listItem]; // Start with the base listItem class
+  const classes = [styles.baseTimer]; // Start with the base listItem class
 
   if (isCurrent) {
     classes.push(styles.currentTimer);
+  }
+
+  if (timer.elapsedTime) {
     if (timer.isOverrun) {
-      classes.push(styles.overrunningTimer);
+      classes.push(styles.overrun);
     } else {
-      classes.push(styles.runningTimer);
+      classes.push(styles.run);
     }
   } else {
-    if (timer.isOverrun) {
-      classes.push(styles.overrunTimer);
-    } else {
-      if (hasFinished) {
-        if (timer.elapsedTime) {
-          classes.push(styles.finishedTimerWithTime);
-        } else {
-          classes.push(styles.finishedTimer);
-        }
-      }
-    }
+    classes.push(styles.waiting);
+  }
+
+  if (timer.isRunning) {
+    classes.push(styles.running);
   }
 
   return classes.join(' '); // Join class names into a single string

@@ -18,31 +18,87 @@
 
 .currentTimer {
   border: 3px solid black;
-  background-image: repeated-linear-gradient(
-    -45deg,
-    transparent,
-    transparent 20px,
-    black 20px,
-    black 40px
-  );
 }
 
-.runningTimer {
-  background-image: lightgreen;
-}
-
-.overrunningTimer {
-  background-image: lightcoral;
-}
-
-.overrunTimer {
-  background-image: #ffdddd;
-}
-
-.finishedTimerWithTime {
-  background-color: #ddffdd;
-}
-
-.finishedTimer {
+.waiting {
   background-color: #f9f9f9;
+  --st: #f9f9f9;
+}
+
+.run {
+  background-color: #ddffdd;
+  --st: #ddffdd;
+}
+
+.overrun {
+  background-color: #ffdddd;
+  --st: #ffdddd;
+}
+
+@keyframes example {
+  from {
+    background-image:
+    /* On "top" */ repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      #eee 10px,
+      #eee 20px
+    );
+  }
+  to {
+    background-image:
+    /* On "top" */ repeating-linear-gradient(
+      45deg,
+      #eee,
+      #eee 10px,
+      transparent 10px,
+      transparent 20px
+    );
+  }
+}
+
+.running2 {
+  filter: brightness(90%);
+  background-image:
+  /* On "top" */ repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    #eee 10px,
+    #eee 20px
+  );
+  animation-name: example;
+  animation-duration: 0.5s;
+  animation-iteration-count: infinite;
+}
+/* https://codepen.io/t_afif/pen/xxaOXQr */
+.running {
+  --s: 30px; /* control the size */
+  --g: 10px; /* control the gap */
+  --c: #eee;
+
+  --_l: #0000 calc(33% - 0.866 * var(--g)),
+    var(--c) calc(33.2% - 0.866 * var(--g)) 33%, #0000 34%;
+  background: repeating-linear-gradient(var(--c) 0 var(--g), #0000 0 50%) 0
+      calc(0.866 * var(--s) - var(--g) / 2),
+    conic-gradient(from -150deg at var(--g) 50%, var(--c) 120deg, #0000 0),
+    linear-gradient(-120deg, var(--_l)),
+    linear-gradient(-60deg, var(--_l)) var(--st); /* second color */
+  background-size: var(--s) calc(3.466 * var(--s));
+  animation: p infinite 1s linear;
+  animation-direction: reverse;
+}
+.running3 {
+  content: '';
+  position: fixed;
+  inset: 0;
+  -webkit-mask: linear-gradient(#000 50%, #0000 0) 0 calc(0.866 * var(--s)) /
+    100% calc(3.466 * var(--s));
+  animation-direction: reverse;
+}
+@keyframes p {
+  to {
+    background-position-x: calc(-1 * var(--s));
+  }
 }
