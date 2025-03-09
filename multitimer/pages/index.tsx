@@ -20,21 +20,13 @@ const TimerTestPage: React.FC = () => {
     null,
   );
 
-  const partialUpdateSequence = (
-    updatedTimer: Timer,
-    currentSequence: Timer[],
-  ) => {
-    const updatedSequence = currentSequence.map(
-      (timer) => (timer.id === updatedTimer.id ? updatedTimer : timer), // Update the specific timer in the sequence
-    );
-    return updatedSequence;
-  };
-
-  const updateSequence = (updatedTimer: Timer) => {
-    const updatedSequence = timerSequence.map(
-      (timer) => (timer.id === updatedTimer.id ? updatedTimer : timer), // Update the specific timer in the sequence
-    );
-    setTimerSequence(updatedSequence);
+  const updateTimerInSequence = (updatedTimer: Timer) => {
+    setTimerSequence((sequence) => {
+      const updatedSequence = sequence.map(
+        (timer) => (timer.id === updatedTimer.id ? updatedTimer : timer), // Update the specific timer in the sequence
+      );
+      return updatedSequence;
+    });
   };
 
   const handleAddTimer = () => {
@@ -44,6 +36,7 @@ const TimerTestPage: React.FC = () => {
       elapsedTime: 0,
       isRunning: false,
       isOverrun: false,
+      name: 'unnamed timer',
     };
     const updatedSequence = addTimerToSequence(timerSequence, newTimer);
     setTimerSequence(updatedSequence); // Update the timerSequence state
@@ -110,7 +103,7 @@ const TimerTestPage: React.FC = () => {
     if (timerIndexToStart >= 0) {
       const updatedTimer = startTimer(timerSequence[timerIndexToStart]); // Call startTimer logic
       setCurrentTimerIndex(timerIndexToStart);
-      updateSequence(updatedTimer);
+      updateTimerInSequence(updatedTimer);
     }
   };
 
@@ -119,31 +112,19 @@ const TimerTestPage: React.FC = () => {
     const timerIndexToStop = timerSequence.findIndex(
       (timer) => timer.id === timerId,
     );
-    let updatedSequence = timerSequence;
     if (timerIndexToStop >= 0 && timerSequence[timerIndexToStop].isRunning) {
       const stoppedTimer = stopTimer(timerSequence[timerIndexToStop]);
-      updatedSequence = partialUpdateSequence(stoppedTimer, updatedSequence);
+      updateTimerInSequence(stoppedTimer);
       if (timerIndexToStop == currentTimerIndex) {
         const timerIndexToStart = timerIndexToStop + 1;
         if (timerIndexToStart <= timerSequence.length - 1) {
           const startedTimer = startTimer(timerSequence[timerIndexToStart]);
           setCurrentTimerIndex(timerIndexToStart);
-          updatedSequence = partialUpdateSequence(
-            startedTimer,
-            updatedSequence,
-          );
+          updateTimerInSequence(startedTimer);
         } else {
           setCurrentTimerIndex(null);
         }
       }
-    }
-    setTimerSequence(updatedSequence);
-  };
-
-  const handleUpdateTimer = (timerId: string | number, value: string) => {
-    const timerToUpdate = timerSequence.find((timer) => timer.id === timerId);
-    if (timerToUpdate) {
-      timerToUpdate.expectedTime = parseInt(value);
     }
   };
 
@@ -159,13 +140,10 @@ const TimerTestPage: React.FC = () => {
   };
 
   const handleMasterResetTimer = () => {
-    let updatedSequence = timerSequence;
-
     timerSequence.map((timer) => {
       const changedTimer = resetTimer(timer);
-      updatedSequence = partialUpdateSequence(changedTimer, updatedSequence);
+      updateTimerInSequence(changedTimer);
     });
-    setTimerSequence(updatedSequence);
     setCurrentTimerIndex(null);
   };
 
@@ -174,17 +152,17 @@ const TimerTestPage: React.FC = () => {
     if (currentTimerIndex != null) {
       if (timerSequence[currentTimerIndex].isRunning) {
         const updatedTimer = stopTimer(timerSequence[currentTimerIndex]);
-        updateSequence(updatedTimer);
+        updateTimerInSequence(updatedTimer);
       } else {
         const updatedTimer = startTimer(timerSequence[currentTimerIndex]);
-        updateSequence(updatedTimer);
+        updateTimerInSequence(updatedTimer);
       }
     } else {
       if (timerSequence.length > 0) {
         // Start the first timer
         setCurrentTimerIndex(0);
         const updatedTimer = startTimer(timerSequence[0]);
-        updateSequence(updatedTimer);
+        updateTimerInSequence(updatedTimer);
       }
     }
   };
@@ -276,7 +254,7 @@ const TimerTestPage: React.FC = () => {
         onMoveDown={handleMoveTimerDown}
         onStart={handleStartTimer}
         onNext={handleNextTimer}
-        onUpdateTimer={handleUpdateTimer}
+        updateTimerInSequence={updateTimerInSequence}
       />
     </div>
   );

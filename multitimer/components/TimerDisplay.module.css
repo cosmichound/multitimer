@@ -7,13 +7,61 @@
   font-size: 0.9em;
 }
 
+/* src/components/TimerDisplay.module.css */
+
+/* ... (existing styles: .listItem, .listItemRunning, .listItemOverrun, .listItemCurrent, .buttonStyle, .buttonStyleSmall) ... */
+
 .baseTimer {
+  display: flex; /* Enable Flexbox for timer row */
+  flex-wrap: wrap;
+
   border: 1px solid #eee;
   border-radius: 5px;
   padding: 10px;
   margin-bottom: 10px;
-  background-color: #bbbbbb;
-  background-image: none;
+  background-color: #f9f9f9;
+  align-items: center; /* Vertically align items in the row */
+}
+
+.nameColumn,
+.expectedTimeColumn,
+.elapsedTimeColumn,
+.buttonsColumn {
+  padding: 8px; /* Add some padding to columns */
+  /* border: 1px solid red; */
+  /* You can adjust flex-grow and flex-basis to control column widths */
+}
+.expectedTimeColumn,
+.elapsedTimeColumn {
+  flex-grow: auto;
+  grid-template-rows: 2;
+}
+.expectedTimeColumn input {
+  width: 3em;
+  font-size: 230%;
+  padding: 0;
+  margin: 0;
+}
+
+.buttonsColumn {
+  display: grid; /* Enable CSS Grid Layout for buttons column */
+  grid-template-columns: repeat(
+    2,
+    1fr
+  ); /* 3 columns for now, adjust if needed - we'll make it 2x4 or similar*/
+  grid-template-rows: auto auto; /* Two rows, auto height */
+}
+
+.nameColumn {
+  flex: 40%;
+}
+.timeTitle {
+  text-decoration: underline;
+}
+.timeDisplay {
+  font-size: 250%;
+  font-family: 'Courier New', Courier, monospace;
+  text-align: center; /* Vertically align items in the row */
 }
 
 .currentTimer {
@@ -58,20 +106,6 @@
   }
 }
 
-.running2 {
-  filter: brightness(90%);
-  background-image:
-  /* On "top" */ repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 10px,
-    #eee 10px,
-    #eee 20px
-  );
-  animation-name: example;
-  animation-duration: 0.5s;
-  animation-iteration-count: infinite;
-}
 /* https://codepen.io/t_afif/pen/xxaOXQr */
 .running {
   --s: 30px; /* control the size */
@@ -87,14 +121,6 @@
     linear-gradient(-60deg, var(--_l)) var(--st); /* second color */
   background-size: var(--s) calc(3.466 * var(--s));
   animation: p infinite 1s linear;
-  animation-direction: reverse;
-}
-.running3 {
-  content: '';
-  position: fixed;
-  inset: 0;
-  -webkit-mask: linear-gradient(#000 50%, #0000 0) 0 calc(0.866 * var(--s)) /
-    100% calc(3.466 * var(--s));
   animation-direction: reverse;
 }
 @keyframes p {

@@ -12,7 +12,7 @@ interface TimerSequenceDisplayProps {
   onMoveDown: (timerId: string | number, currentIndex: number) => void;
   onStart: (timerId: string | number) => void;
   onNext: (timerId: string | number) => void;
-  onUpdateTimer: (timerId: string | number, value: string) => void;
+  updateTimerInSequence: (timer: Timer) => void;
 }
 
 const TimerSequenceDisplay: React.FC<TimerSequenceDisplayProps> = ({
@@ -23,7 +23,7 @@ const TimerSequenceDisplay: React.FC<TimerSequenceDisplayProps> = ({
   onMoveDown,
   onStart,
   onNext,
-  onUpdateTimer,
+  updateTimerInSequence,
 }) => {
   return (
     <div>
@@ -41,7 +41,7 @@ const TimerSequenceDisplay: React.FC<TimerSequenceDisplayProps> = ({
             onMoveDown={onMoveDown}
             onStart={onStart}
             onNext={onNext}
-            onUpdateTimer={onUpdateTimer}
+            updateTimerInSequence={updateTimerInSequence}
             isCurrent={index == currentTimerIndex}
             hasFinished={
               (currentTimerIndex && index < currentTimerIndex) ||
