@@ -94,8 +94,12 @@ const TimerTestPage: React.FC = () => {
 
   // Starting a timer stops the running timer
   const handleStartTimer = (timerId: string | number) => {
-    if (currentTimerIndex && timerSequence[currentTimerIndex].isRunning) {
-      stopTimer(timerSequence[currentTimerIndex]);
+    if (
+      currentTimerIndex !== null &&
+      timerSequence[currentTimerIndex].isRunning
+    ) {
+      const updatedTimer = stopTimer(timerSequence[currentTimerIndex]);
+      updateTimerInSequence(updatedTimer);
     }
     const timerIndexToStart = timerSequence.findIndex(
       (timer) => timer.id === timerId,
@@ -225,7 +229,8 @@ const TimerTestPage: React.FC = () => {
         <em>
           Only one timer is running at a time. Add new timers at the bottom.
           Pressing next (on the timer or at the top) stops the current timer and
-          starts the next one down.
+          starts the next one down. Click the expected time or the name to edit
+          them.
         </em>
       </div>
       <StatusPanel
