@@ -5,7 +5,6 @@ interface MasterControlsProps {
   onMasterNext: () => void;
   onMasterReset: () => void;
   onDeleteAll: () => void;
-  onMasterAdd: () => void;
   numTimers: number;
   isStarted: boolean;
   isRunning: boolean;
@@ -16,11 +15,11 @@ const masterControlText = (
   isStarted: boolean,
   isRunning: boolean,
 ) => {
-  if (isStarted != null) {
+  if (isStarted) {
     if (isRunning) {
       return 'Pause Running Timer';
     } else {
-      return 'Start Current Timer.';
+      return 'Start Current Timer';
     }
   }
   if (numTimers > 0) {
@@ -35,7 +34,6 @@ const MasterControls: React.FC<MasterControlsProps> = ({
   onMasterNext,
   onMasterReset,
   onDeleteAll,
-  onMasterAdd,
   numTimers,
   isStarted,
   isRunning,
@@ -53,7 +51,7 @@ const MasterControls: React.FC<MasterControlsProps> = ({
         <button
           className={styles.buttonStyle}
           onClick={onMasterNext}
-          disabled={!isStarted}
+          disabled={!isRunning}
         >
           Next Timer
         </button>
@@ -64,13 +62,6 @@ const MasterControls: React.FC<MasterControlsProps> = ({
         </button>
         <button className={styles.buttonStyle} onClick={onDeleteAll}>
           Delete All
-        </button>
-      </div>
-      <div className={styles.section}>
-        {' '}
-        {/* Button container styling */}
-        <button className={styles.buttonStyle} onClick={onMasterAdd}>
-          Add Timer
         </button>
       </div>
     </div>

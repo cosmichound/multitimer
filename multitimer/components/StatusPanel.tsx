@@ -13,10 +13,22 @@ const StatusPanel: React.FC<StatusPanelProps> = ({
 }) => {
   return (
     <div className={styles.section}>
-      {' '}
-      Current Elapsed Time: {formatTime(totalRunTime)} -- Current Over Time:{' '}
-      {formatTime(totalOverTime)} -- Total Target Time:{' '}
-      {formatTime(totalTargetTime)}
+      <div className={styles.timerContainer}>
+        <div className={styles.timeBox}>
+          <div className={styles.timeTitle}>Current Elapsed Time</div>
+          <div className={styles.timeDisplay}>{formatTime(totalRunTime)}</div>
+        </div>
+        <div className={styles.timeBox}>
+          <div className={styles.timeTitle}>Total Over Time</div>
+          <div className={styles.timeDisplay}>{formatTime(totalOverTime)}</div>
+        </div>
+        <div className={styles.timeBox}>
+          <div className={styles.timeTitle}>Total Target Time</div>
+          <div className={styles.timeDisplay}>
+            {formatTime(totalTargetTime)}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

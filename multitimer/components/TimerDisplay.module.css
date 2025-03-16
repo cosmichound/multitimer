@@ -10,14 +10,52 @@
 /* src/components/TimerDisplay.module.css */
 
 /* ... (existing styles: .listItem, .listItemRunning, .listItemOverrun, .listItemCurrent, .buttonStyle, .buttonStyleSmall) ... */
+.activeIcon {
+  margin: 4px;
+  display: flex; /* Enable flexbox for the div */
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+}
+.nextIconPaused {
+  stroke: lightgrey;
+  fill: lightgrey;
+}
+.nextIconRunning {
+  stroke: black;
+  fill: black;
+}
+.nextIconRunning:hover {
+  stroke: white;
+  fill: white;
+}
+
+.playIcon:hover {
+  stroke: green;
+  fill: green;
+}
+
+.pauseIcon:hover {
+  stroke: white;
+  fill: white;
+}
+
+.removeIcon:hover {
+  stroke: red;
+  stroke-width: 4;
+  fill: red;
+}
+
+.timerContainer {
+  display: flex;
+}
 
 .baseTimer {
-  display: flex; /* Enable Flexbox for timer row */
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 24 auto;
 
   border: 1px solid #eee;
   border-radius: 5px;
-  padding: 10px;
+  padding: 4px;
   margin-bottom: 10px;
   background-color: #f9f9f9;
   align-items: center; /* Vertically align items in the row */
@@ -27,41 +65,34 @@
 .expectedTimeColumn,
 .elapsedTimeColumn,
 .buttonsColumn {
-  padding: 8px; /* Add some padding to columns */
+  margin: 2px;
+  padding: 12px;
   /* border: 1px solid red; */
   /* You can adjust flex-grow and flex-basis to control column widths */
 }
 .expectedTimeColumn,
 .elapsedTimeColumn {
-  flex-grow: auto;
-  grid-template-rows: 2;
-}
-.expectedTimeColumn input {
-  width: 3em;
-  font-size: 230%;
-  padding: 0;
-  margin: 0;
+  composes: timeBox from './BaseStyles.module.css';
+  margin: 2px;
+  padding: 12px;
 }
 
 .buttonsColumn {
-  display: grid; /* Enable CSS Grid Layout for buttons column */
-  grid-template-columns: repeat(
-    2,
-    1fr
-  ); /* 3 columns for now, adjust if needed - we'll make it 2x4 or similar*/
-  grid-template-rows: auto auto; /* Two rows, auto height */
+  border: 1px solid #eee;
+  padding: 0px;
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  grid-template-rows: auto auto;
 }
 
 .nameColumn {
   flex: 40%;
 }
 .timeTitle {
-  text-decoration: underline;
+  composes: timeTitle from './BaseStyles.module.css';
 }
 .timeDisplay {
-  font-size: 250%;
-  font-family: 'Courier New', Courier, monospace;
-  text-align: center; /* Vertically align items in the row */
+  composes: timeDisplay from './BaseStyles.module.css';
 }
 
 .currentTimer {

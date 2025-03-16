@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Timer,
   addTimerToSequence,
-  moveTimerInSequence,
   removeTimerFromSequence,
   startTimer,
   stopTimer,
@@ -13,6 +12,8 @@ import {
 import TimerSequenceDisplay from '../components/TimerSequenceDisplay';
 import MasterControls from '../components/MasterControls';
 import StatusPanel from '../components/StatusPanel';
+import { arrayMove } from '@dnd-kit/sortable';
+import styles from '../components/BaseStyles.module.css'; // Import CSS Module (convention: import as 'styles')
 
 const TimerTestPage: React.FC = () => {
   const [timerSequence, setTimerSequence] = useState<Timer[]>([]);
@@ -36,7 +37,7 @@ const TimerTestPage: React.FC = () => {
       elapsedTime: 0,
       isRunning: false,
       isOverrun: false,
-      name: 'unnamed timer',
+      name: 'Timer ' + (timerSequence.length + 1),
     };
     const updatedSequence = addTimerToSequence(timerSequence, newTimer);
     setTimerSequence(updatedSequence); // Update the timerSequence state
@@ -54,42 +55,32 @@ const TimerTestPage: React.FC = () => {
     setTimerSequence(updatedSequence);
   };
 
-  const handleMoveTimerUp = (
-    timerId: string | number,
-    currentIndex: number,
+  const handleSwapTimers = (
+    firstId: string | number,
+    secondId: string | number,
   ) => {
-    if (currentIndex > 0) {
-      // Prevent moving up if already at the top (index 0)
-      const newPosition = currentIndex - 1;
-      const updatedSequence = moveTimerInSequence(
-        timerSequence,
-        timerId,
-        newPosition,
-      );
-      setTimerSequence(updatedSequence);
-      if (currentIndex == currentTimerIndex) {
-        setCurrentTimerIndex(newPosition);
-      }
-    }
-  };
+    let currentTimerId: string | number | null = null;
 
-  const handleMoveTimerDown = (
-    timerId: string | number,
-    currentIndex: number,
-  ) => {
-    if (currentIndex < timerSequence.length - 1) {
-      // Prevent moving down if already at the bottom
-      const newPosition = currentIndex + 1;
-      const updatedSequence = moveTimerInSequence(
-        timerSequence,
-        timerId,
-        newPosition,
-      );
-      setTimerSequence(updatedSequence);
-      if (currentIndex == currentTimerIndex) {
-        setCurrentTimerIndex(newPosition);
+    setTimerSequence((sequence) => {
+      if (currentTimerIndex != null) {
+        currentTimerId = timerSequence[currentTimerIndex].id;
       }
-    }
+      const firstTimerIndex = timerSequence.findIndex(
+        (timer) => timer.id === firstId,
+      );
+      const secondTimerIndex = timerSequence.findIndex(
+        (timer) => timer.id === secondId,
+      );
+      const newSequnce = arrayMove(sequence, firstTimerIndex, secondTimerIndex);
+      if (currentTimerId != null) {
+        const newCurrentTimerIndex = newSequnce.findIndex(
+          (timer) => timer.id === currentTimerId,
+        );
+        console.log(newCurrentTimerIndex);
+        setCurrentTimerIndex(newCurrentTimerIndex);
+      }
+      return newSequnce;
+    });
   };
 
   // Starting a timer stops the running timer
@@ -109,6 +100,15 @@ const TimerTestPage: React.FC = () => {
       setCurrentTimerIndex(timerIndexToStart);
       updateTimerInSequence(updatedTimer);
     }
+  };
+
+  const handlePauseTimer = (timerId: string | number) => {
+    const timerIndexToPause = timerSequence.findIndex(
+      (timer) => timer.id === timerId,
+    );
+
+    const updatedTimer = stopTimer(timerSequence[timerIndexToPause]);
+    updateTimerInSequence(updatedTimer);
   };
 
   // Stopping a timer starts the next timer in the sequence
@@ -224,14 +224,17 @@ const TimerTestPage: React.FC = () => {
       {' '}
       {/* Main container styling */}
       <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Multitimer</h1>
-      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-        {' '}
-        <em>
-          Only one timer is running at a time. Add new timers at the bottom.
-          Pressing next (on the timer or at the top) stops the current timer and
-          starts the next one down. Click the expected time or the name to edit
-          them.
-        </em>
+      <div className={styles.helpTextBlock}>
+        Only one timer is running at a time. Add new timers at the bottom.
+      </div>
+      <div className={styles.helpTextBlock}>
+        Pressing next (on the timer or at the top) stops the current timer and
+        starts the next one down. Click the expected time or the name to edit
+        them.
+      </div>
+      <div className={styles.helpTextBlock}>
+        You can delete times with the X button or change the order by dragging
+        the handle on the left.
       </div>
       <StatusPanel
         totalRunTime={totalRunTime()}
@@ -243,7 +246,6 @@ const TimerTestPage: React.FC = () => {
         onMasterNext={handleMasterNextTimer}
         onMasterReset={handleMasterResetTimer}
         onDeleteAll={handleDeleteAll}
-        onMasterAdd={handleAddTimer}
         numTimers={timerSequence.length}
         isStarted={currentTimerIndex != null}
         isRunning={
@@ -255,14 +257,18 @@ const TimerTestPage: React.FC = () => {
         timerSequence={timerSequence}
         currentTimerIndex={currentTimerIndex}
         onRemove={handleRemoveTimer}
-        onMoveUp={handleMoveTimerUp}
-        onMoveDown={handleMoveTimerDown}
+        onPause={handlePauseTimer}
+        swapTimers={handleSwapTimers}
         onStart={handleStartTimer}
         onNext={handleNextTimer}
         updateTimerInSequence={updateTimerInSequence}
       />
+      <div className={styles.addTimerPlaceholder}>
+        <button className={styles.buttonStyle} onClick={handleAddTimer}>
+          Add Timer
+        </button>
+      </div>
     </div>
   );
 };
-
 export default TimerTestPage;
