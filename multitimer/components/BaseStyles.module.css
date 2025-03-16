@@ -1,0 +1,55 @@
+.buttonStyle {
+  padding: 8px 15px;
+  margin: 5px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+}
+
+.helpTextBlock {
+  margin-bottom: 20px;
+  text-align: center;
+  font-style: italic;
+}
+
+.section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.timerContainer {
+  display: flex;
+}
+
+.timeBox {
+  border: 1px solid grey;
+  grid-template-rows: 2;
+  margin: 8px;
+  padding: 24px;
+}
+
+.timeTitle {
+  text-decoration: underline;
+  text-align: center;
+}
+.timeDisplay {
+  font-size: 250%;
+  font-family: 'Courier New', Courier, monospace;
+  text-align: center; /* Vertically align items in the row */
+}
+
+.addTimerPlaceholder {
+  display: flex;
+  border: 2px dashed grey;
+  border-radius: 5px;
+  padding: 12px;
+  align-items: center;
+  justify-content: center;
+}
+.list {
+  list-style-type: none;
+  padding: 0;
+}
